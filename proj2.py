@@ -17,18 +17,19 @@ def norm(dataset):
 
         dataset[column_index] = (dataset[column_index] - min_val) / (max_val - min_val)
 
-def loop(dataset, error_threshold):
+def train(dataset, error_threshold):
     limit = 5000
-    alpha = 0.3
+    alpha = 0.01                     #hard activation function
     patterns = dataset.shape[0]
     w = [random.uniform(-0.5, 0.5) for _ in range(dataset.shape[1])]
-    
+    print(w)
     
     
     #while i is less than 5000 or the total error is not accurate enough
     i = 0
-    while i < limit or total_error() > error_threshold:     #work on total error
-        #for every line in the csv
+    error = patterns
+    while i < limit or error > error_threshold:  #work on total error
+        error = 0
         for row in range(patterns):                         #work on training and testing
             x = dataset.iloc[row].values
             
@@ -38,22 +39,20 @@ def loop(dataset, error_threshold):
             else:
                 scaled_x = 0
                 
+            #for total error. sum[(out - desired)^2]. (-1)^2 = 1 and 1^2 = 1 so 
+            #just use += when they're different. forehead
+            if x[2] != scaled_x:
+                error += 1
+                
             delta_weight = alpha * (x[2] - scaled_x)
             delta_weighted_x = x * delta_weight
             w = np.array(w) + np.array(delta_weighted_x)
         i += 1
-                
-                
-                
+    
+    
     # get accuracy, confusion matrices and rates
     return w
 
-
-
-def total_error(test, correct):                                 #from slide 11
-    comparison = test.compare(correct, align_axis = 2)
-    return comparison['Value'].count()
-    
 
 
 if __name__ == "__main__":
@@ -89,13 +88,9 @@ if __name__ == "__main__":
         #answer questions about the two steps above
         
     
-    
-    
     start = time.time()
-    print(loop(a, 0.00001))
+    print(train(a, 0.00001))
     end = time.time()
     
     print(end - start)
     
-    # test = pd.read_csv("test.csv", header = None)
-    # print(loop(test))
